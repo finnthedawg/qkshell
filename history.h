@@ -12,8 +12,6 @@ int addList(char* commandLine,struct Hline* front);
 //Prints the history
 void printHistory();
 
-
-//Constructor initializes a command line struct.
 struct Hline* newHline();
 //Returns a pointer to the last struct in command list.
 static struct Hline* backList(struct Hline* front);

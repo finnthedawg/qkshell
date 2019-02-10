@@ -4,15 +4,11 @@
 
 #include "history.h"
 
-void printHistory(){
-}
-
 int addList(char* commandLine, struct Hline* front){
   struct Hline* latest;
-  //If we are at front of list:
+  //Edge case if history is empty.
   if(front->argc == 0){
     latest = front;
-    //Or, we need to insert it into end.
   } else {
     latest = newHline();
     struct Hline* back = backList(front);
@@ -25,6 +21,17 @@ int addList(char* commandLine, struct Hline* front){
     latest->argc ++;
     printf("%s\n", command);
     command = strtok(NULL," ");
+  }
+}
+
+void printHistory(struct Hline* front){
+  if(front == NULL){
+    printf("There is no history yet.");
+  } else {
+    int counter = 1;
+    while(front -> next != NULL){
+      //TODO
+    }
   }
 }
 
