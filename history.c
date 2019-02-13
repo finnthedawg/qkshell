@@ -28,10 +28,15 @@ void printHistory(struct Hline* front){
   if(front == NULL){
     printf("There is no history yet.\n");
   } else {
+    int count = 1;
+    printf(" %d ", count);
     printHline(front);
-    int counter = 1;
-    while(front -> next != NULL){
-      //TODO
+    printf("\n");
+    while(front -> next != NULL && count++){
+      front = front -> next;
+      printf(" %d ", count);
+      printHline(front);
+      printf("\n");
     }
   }
 }

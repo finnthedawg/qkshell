@@ -18,7 +18,8 @@ int main (){
   // Parse it into history linked list.
   addList(commandLine, front);
   free(commandLine);
-  //printf("%s\n",front->argv[1]);
+
+  //Prints the history
   printHistory(front);
 
 }
