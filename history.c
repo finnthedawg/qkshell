@@ -45,6 +45,27 @@ void printHistory(struct Hline* front){
   }
 }
 
+void appendCommand(char* commandLine){
+  FILE *fp = fopen("history.txt","a");
+  fprintf(fp,"%s\n",commandLine);
+  fclose(fp);
+}
+
+struct Hline* loadHistory(){
+  struct Hline* front = newHline();
+
+  FILE *fp = fopen("history.txt","r");
+  char* commandLine = (char*)malloc(1024);
+  while(fgets(commandLine, 1024, fp)){
+    strtok(commandLine, "\n");
+    addList(commandLine, front);
+  }
+  free(commandLine);
+  fclose(fp);
+
+  return(front);
+}
+
 //#Helper functions
 void printHline(struct Hline* node){
   if(node == NULL){

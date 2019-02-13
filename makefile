@@ -9,4 +9,4 @@ history.o: history.c history.h
 	gcc history.c -o history.o -c
 
 clean:
-	rm *.o sh
+	rm *.o sh history.txt
