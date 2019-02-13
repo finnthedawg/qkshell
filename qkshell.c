@@ -19,6 +19,7 @@ int main (){
   addList(commandLine, front);
   free(commandLine);
   //printf("%s\n",front->argv[1]);
+  printHistory(front);
 
 }
 

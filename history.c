@@ -26,8 +26,9 @@ int addList(char* commandLine, struct Hline* front){
 
 void printHistory(struct Hline* front){
   if(front == NULL){
-    printf("There is no history yet.");
+    printf("There is no history yet.\n");
   } else {
+    printHline(front);
     int counter = 1;
     while(front -> next != NULL){
       //TODO
@@ -36,12 +37,26 @@ void printHistory(struct Hline* front){
 }
 
 //#Helper functions
+void printHline(struct Hline* node){
+  if(node == NULL){
+    printf("NULL node\n");
+  } else {
+    for (int i = 0; i<ARGCOUNT && node -> argv[i] != NULL; i++){
+      printf("%s ", node -> argv[i]);
+    }
+  }
+}
+
 //Constructor initializes a command line struct.
 struct Hline* newHline(){
   struct Hline* newHline;
   newHline = (struct Hline *)malloc(sizeof(struct Hline));
   newHline -> next = NULL;
   newHline -> argc = 0;
+  //Sets command text pointers to NULL
+  for (int i = 0; i<32; i++){
+    newHline -> argv[i] = NULL;
+  }
   return(newHline);
 }
 

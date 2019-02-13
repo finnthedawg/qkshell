@@ -3,7 +3,7 @@ Custom Unix CLI shell written in the C language.
 
 ---
 
-## Quickshell features
+## quickshell features
 
 * **pwd** - Print working directory.
 
