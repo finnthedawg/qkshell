@@ -55,13 +55,15 @@ struct Hline* loadHistory(){
   struct Hline* front = newHline();
 
   FILE *fp = fopen("history.txt","r");
-  char* commandLine = (char*)malloc(1024);
-  while(fgets(commandLine, 1024, fp)){
-    strtok(commandLine, "\n");
-    addList(commandLine, front);
+  if(fp != NULL){
+    char* commandLine = (char*)malloc(1024);
+    while(fgets(commandLine, 1024, fp)){
+      strtok(commandLine, "\n");
+      addList(commandLine, front);
+    }
+    free(commandLine);
+    fclose(fp);
   }
-  free(commandLine);
-  fclose(fp);
 
   return(front);
 }

@@ -11,7 +11,7 @@ struct Hline {
 };
 
 //Parses line and adds argvs to command history list.
-//Returns pointer to first commandName. (Not flags)
+//Returns pointer to argvs.
 //Inserts /0 into commandLine string's delimiters.
 char* addList(char* commandLine,struct Hline* front);
 //Prints the history
