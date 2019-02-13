@@ -4,7 +4,7 @@
 
 #include "history.h"
 
-int addList(char* commandLine, struct Hline* front){
+char* addList(char* commandLine, struct Hline* front){
   struct Hline* latest;
   //Edge case if history is empty.
   if(front->argc == 0){
@@ -16,13 +16,16 @@ int addList(char* commandLine, struct Hline* front){
   }
   //Populate the struct with recieved values.
   char* command = strtok(commandLine, " ");
+  //Store value of first command.
+  char* first = strdup(command);
   while(command != NULL){
     latest->argv[latest->argc] = strdup(command);
     latest->argc ++;
-    printf("%s\n", command);
     command = strtok(NULL," ");
   }
+  return(first);
 }
+
 
 void printHistory(struct Hline* front){
   if(front == NULL){
@@ -38,6 +41,7 @@ void printHistory(struct Hline* front){
       printHline(front);
       printf("\n");
     }
+    return;
   }
 }
 

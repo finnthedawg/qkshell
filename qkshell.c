@@ -5,19 +5,24 @@
 #include "history.h"
 
 int main (){
-  //Front of command history. (Linked List)
+  //Front of history node.
   struct Hline* front = newHline();
 
-  //Read commands, each line being 256 max.
-  char* commandLine = (char*)malloc(256);
-  fgets(commandLine, 256, stdin);
+  while(1){
+  //Store commandLine. Assume max of 1024.
+  char* commandLine = (char*)malloc(1024);
+
+  fgets(commandLine, 1024, stdin);
   strtok(commandLine, "\n");
+  // Parse it into history linked list, and store first command.
+  char* command = addList(commandLine, front);
+  //Begin checking built in commands.
+  if(!strcmp(command, "history"))
+    printHistory(front);
 
-  //Executes it.
 
-  // Parse it into history linked list.
-  addList(commandLine, front);
   free(commandLine);
+  }
 
   //Prints the history
   printHistory(front);
