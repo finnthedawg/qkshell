@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unstd.h>
 
 #include "history.h"
 #include "path.h"
+
+#define MAXLINE 1024
 
 int main (){
   //Load history from file.
@@ -20,8 +23,8 @@ int main (){
   //Each time user enters a new command.
   while(1){
     //Store commandLine. Assume max of 1024.
-    char* commandLine = (char*)malloc(1024);
-    fgets(commandLine, 1024, stdin);
+    char* commandLine = (char*)malloc(MAXLINE);
+    fgets(commandLine, MAXLINE, stdin);
     strtok(commandLine, "\n");
     //Also save to history file.
     appendCommand(commandLine);
@@ -32,7 +35,6 @@ int main (){
     if(!strcmp(command, "history"))
       printHistory(front);
 
-    //Begin checking system commands.
     if(!strcmp(command, "export")){
       //If only export, then we print the exported paths.
       if(!strcmp(commandLine, "export")){
@@ -42,6 +44,13 @@ int main (){
       }
     }
 
+    if(!strcmp(command, "pwd")){
+      char* wd = (char*)malloc(MAXLINE);
+      wd = getcwd(wd, MAXLINE);
+    }
+    printHistory(front);
+
+    //Begin checking system commands.
     free(commandLine);
   }
 
