@@ -20,7 +20,7 @@ void setPath(struct Path** Paths, char* commandLine){
   }
 
   char* Pval = strtok(NULL, "\0");
-  if(strlen(Pval) == 0){
+  if(Pval == NULL || strlen(Pval) == 0){
     printf("Please specify values for your path using =p1:p2:p3");
     return;
   } else {
@@ -34,6 +34,7 @@ void setPath(struct Path** Paths, char* commandLine){
     if(Paths[i] == NULL){
       Paths[i] = newPath();
       Paths[i]->argv[0] = Pname;
+      Paths[i]->pathC = Paths[i]->pathC + 1;
       setNode(Paths[i], Pval);
       return;
     }
@@ -53,7 +54,11 @@ void setPath(struct Path** Paths, char* commandLine){
 }
 
 void setNode(struct Path* target, char* Paths){
-
+  printf("%s", Paths);
+  // char* Pval = strtok(Paths);
+  // while(strlen(Pval) != 0){
+  //  target
+  // }
 }
 
 struct Path* newPath(){
