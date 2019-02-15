@@ -34,9 +34,9 @@ int main (){
 
     //Begin checking system commands.
     if(!strcmp(command, "export")){
-      //If only export, then we print the KEY;VALS.
+      //If only export, then we print the exported paths.
       if(!strcmp(commandLine, "export")){
-        printPath(PathArray[0]);
+        printPath(PathArray);
       } else {
         setPath(PathArray, commandLine);
       }

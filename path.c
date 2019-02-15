@@ -36,6 +36,7 @@ void setPath(struct Path** Paths, char* commandLine){
       Paths[i]->argv[0] = Pname;
       Paths[i]->pathC = Paths[i]->pathC + 1;
       setNode(Paths[i], Pval);
+      free(Pval);
       return;
     }
     //If this path is already defined
@@ -44,6 +45,7 @@ void setPath(struct Path** Paths, char* commandLine){
       free(Paths[i]->argv[0]);
       Paths[i]->argv[0] = Pname;
       setNode(Paths[i], Pval);
+      free(Pval);
       return;
     }
   }
@@ -54,11 +56,14 @@ void setPath(struct Path** Paths, char* commandLine){
 }
 
 void setNode(struct Path* target, char* Paths){
-  printf("%s", Paths);
-  // char* Pval = strtok(Paths);
-  // while(strlen(Pval) != 0){
-  //  target
-  // }
+  char* Pval = strtok(Paths, ":");
+  while(Pval != NULL && strlen(Pval) != 0){
+    Pval = strdup(Pval);
+    target->argv[target -> pathC] = Pval;
+    target->pathC = target->pathC + 1;
+    Pval = strtok(NULL, ":");
+  }
+  return;
 }
 
 struct Path* newPath(){
@@ -72,15 +77,26 @@ struct Path* newPath(){
   return(newPath);
 }
 
-void printPath(struct Path* target){
-  if(target == NULL){
-    printf("NULL node\n");
-  } else {
-    printf("%s=\n", target -> argv[0]);
-    for (int i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
-      printf("%s\n", target -> argv[i]);
+void printPath(struct Path** PathArray){
+  for(int i = 0; i<PATHCOUNT; i++){
+    if(printPathNode(PathArray[i]) == 1){
+      break;
     }
   }
+  return;
+}
+
+int printPathNode(struct Path* target){
+  if(target == NULL){
+    return(1);
+  } else {
+    printf("%s=", target -> argv[0]);
+    for (int i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
+      (target -> argv[i+1] != NULL ? printf("%s:", target -> argv[i]) : printf("%s", target -> argv[i]));
+    }
+    printf("\n");
+  }
+  return(0);
 }
 
 struct Path* findPath(struct Path** Paths, char* Pvar, int size){

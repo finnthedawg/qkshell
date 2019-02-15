@@ -9,8 +9,8 @@ struct Path {
   char* argv[PATHCOUNT];
 };
 
-//Prings the target node.
-void printPath(struct Path* target);
+//Prints the paths given the array of paths.
+void printPath(struct Path** target);
 
 //SetPath given the path array and commandLine
 void setPath(struct Path** Paths, char* commandLine);
@@ -19,6 +19,9 @@ void setPath(struct Path** Paths, char* commandLine);
 void setNode(struct Path* target, char* Paths);
 
 //Helper functions
+
+//Prings the target node. 0 for success, 1 for FAIL
+int printPathNode(struct Path* target);
 //Creates a empty Path node.
 //Returns pointer to Path node
 struct Path* newPath();
