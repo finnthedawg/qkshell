@@ -26,6 +26,6 @@ struct Hline* loadHistory();
 //Creates structure of a new command.
 struct Hline* newHline();
 //Returns a pointer to the last struct in command list.
-static struct Hline* backList(struct Hline* front);
+struct Hline* backList(struct Hline* front);
 //Prints one Hline.
 void printHline(struct Hline* node);

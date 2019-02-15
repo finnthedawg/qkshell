@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unstd.h>
+#include <unistd.h>
 
 #include "history.h"
 #include "path.h"
@@ -22,6 +22,7 @@ int main (){
 
   //Each time user enters a new command.
   while(1){
+    printf(">> ");
     //Store commandLine. Assume max of 1024.
     char* commandLine = (char*)malloc(MAXLINE);
     fgets(commandLine, MAXLINE, stdin);
@@ -32,10 +33,11 @@ int main (){
     char* command = addList(commandLine, front);
 
     //Begin checking built in commands.
-    if(!strcmp(command, "history"))
+    if(!strcmp(command, "history")){
       printHistory(front);
+    }
 
-    if(!strcmp(command, "export")){
+    else if(!strcmp(command, "export")){
       //If only export, then we print the exported paths.
       if(!strcmp(commandLine, "export")){
         printPath(PathArray);
@@ -44,13 +46,34 @@ int main (){
       }
     }
 
-    if(!strcmp(command, "pwd")){
+    else if(!strcmp(command, "pwd")){
       char* wd = (char*)malloc(MAXLINE);
       wd = getcwd(wd, MAXLINE);
+      printf("%s\n",wd);
     }
-    printHistory(front);
 
-    //Begin checking system commands.
+    else if(!strcmp(command, "cd")){
+      if(chdir(backList(front)->argv[1]) == -1){
+        printf("qksh: %s: error changing directory\n", front->argv[1]);
+      }
+    }
+    //Check system commands in paths.
+    else{
+      char * foundDirectory = findCmd(PathArray, command);
+      if(foundDirectory == NULL){
+        printf("qksh: command %s not found\n", command);
+      } else {
+        printf("%s is an external command (%s)\n",command, foundDirectory);
+        printf("command arguments:\n");
+        for(int i = 1; i< PATHCOUNT; i++){
+          if(backList(front)->argv[i] == NULL){
+            break;
+          }
+          printf("%s\n", backList(front)->argv[i]);
+        }
+      }
+    }
+
     free(commandLine);
   }
 
@@ -58,10 +81,4 @@ int main (){
   printHistory(front);
 
 }
-
-
-//pwd
-//cd
-//export
-//history
 //exit

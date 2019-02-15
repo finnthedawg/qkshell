@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 void setPath(struct Path** Paths, char* commandLine){
   //So we don't modify original commandLine
@@ -97,6 +98,17 @@ int printPathNode(struct Path* target){
     printf("\n");
   }
   return(0);
+}
+
+char* findCmd(struct Path** PathArray, char* file){
+  for(int i = 0; i<PATHCOUNT && PathArray[i] != NULL; i++){
+    for(int j = 0; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
+      if(access(PathArray[i]->argv[j], F_OK) != -1){
+        return(PathArray[i]->argv[j]);
+      }
+    }
+  }
+  return NULL;
 }
 
 struct Path* findPath(struct Path** Paths, char* Pvar, int size){

@@ -18,6 +18,11 @@ void setPath(struct Path** Paths, char* commandLine);
 //SetNode of a target path node with the Paths as a string.
 void setNode(struct Path* target, char* Paths);
 
+//Check for command file within PATH array values.
+//Returns the directory where it is found
+//Returns NULL if file not found
+char* findCmd(struct Path** PathArray, char* file);
+
 //Helper functions
 
 //Prings the target node. 0 for success, 1 for FAIL
