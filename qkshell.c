@@ -10,6 +10,7 @@
 #define MAXLINE 1024
 
 int emptyString(char * string);
+int invokeHistory(char* command);
 
 int main (){
   //Load history from file.
@@ -23,24 +24,35 @@ int main (){
   first -> pathC = 1;
   PathArray[0] = first;
 
+  int replayHistory = 1;
   //Each time user enters a new command.
+  char* commandLine;
+  char* command;
+  struct Hline* currentCmd;
   while(1){
     printf(">> ");
-    //Store commandLine. Assume max of 1024.
-    char* commandLine = (char*)malloc(MAXLINE);
-    fgets(commandLine, MAXLINE, stdin);
-    strtok(commandLine, "\n");
-    if(emptyString(commandLine)){
-      free(commandLine);
-      continue;
+    if (replayHistory == 1){
+      //Store commandLine. Assume max of 1024.
+      commandLine = (char*)malloc(MAXLINE);
+      fgets(commandLine, MAXLINE, stdin);
+      strtok(commandLine, "\n");
+      if(emptyString(commandLine)){
+        free(commandLine);
+        continue;
+      }
+      //Also save to history file.
+      appendCommand(commandLine);
+      // Parse it into history linked list.
+      command = addList(commandLine, front);
+      currentCmd = backList(front);
     }
-    //Also save to history file.
-    appendCommand(commandLine);
-    // Parse it into history linked list, and store argv
-    char* command = addList(commandLine, front);
 
+    if(invokeHistory(command)){
+      //Check if we are repeating history.
+      printf("%s,%d",command, invokeHistory(command));
+    }
     //Begin checking built in commands.
-    if(!strcmp(command, "history")){
+    else if(!strcmp(command, "history")){
       printHistory(front);
     }
 
@@ -60,7 +72,7 @@ int main (){
     }
 
     else if(!strcmp(command, "cd")){
-      if(chdir(backList(front)->argv[1]) == -1){
+      if(chdir(currentCmd->argv[1]) == -1){
         printf("qksh: %s: error changing directory\n", front->argv[1]);
       }
     }
@@ -79,10 +91,10 @@ int main (){
         printf("%s is an external command (%s)\n",command, foundDirectory);
         printf("command arguments:\n");
         for(int i = 1; i< PATHCOUNT; i++){
-          if(backList(front)->argv[i] == NULL){
+          if(currentCmd->argv[i] == NULL){
             break;
           }
-          printf("%s\n", backList(front)->argv[i]);
+          printf("%s\n", currentCmd->argv[i]);
         }
       }
       free(foundDirectory);
@@ -99,4 +111,12 @@ int emptyString(char * string){
     }
   }
   return(1);
+}
+
+int invokeHistory(char* command){
+  if(*command == '!'){
+    return(atoi(command+1));
+  } else {
+    return(0);
+  }
 }
