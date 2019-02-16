@@ -1,15 +1,16 @@
+CFLAGS= -g
 
 sh: qkshell.o history.o path.o
-	gcc qkshell.o history.o path.o -o sh
+	gcc $(CFLAGS) qkshell.o history.o path.o -o sh
 
 qkshell.o: qkshell.c
-	gcc qkshell.c -o qkshell.o -c
+	gcc $(CFLAGS) qkshell.c -o qkshell.o -c
 
 history.o: history.c history.h
-	gcc history.c -o history.o -c
+	gcc $(CFLAGS) history.c -o history.o -c
 
 path.o: path.c path.h
-	gcc path.c -o path.o -c
+	gcc $(CFLAGS) path.c -o path.o -c
 
 clean:
 	rm *.o sh history.txt

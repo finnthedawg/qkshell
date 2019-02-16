@@ -1,5 +1,6 @@
 //Number of flags-2 each command can have
 #define ARGCOUNT 32
+#define MAXLINE 1024
 
 //Struct defining each line in history
 struct Hline {
@@ -20,6 +21,12 @@ void destructList(struct Hline* front);
 
 //Prints the history
 void printHistory(struct Hline* front);
+
+//returns the Nth node;
+struct Hline* findHistoryNode(struct Hline* front, int n);
+
+//returns the original command;
+char* cmdLine(struct Hline* cmd);
 
 //Appends entered command to file.
 //Adds a "\n after command";

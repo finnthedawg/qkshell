@@ -10,7 +10,7 @@
 #define MAXLINE 1024
 
 int emptyString(char * string);
-int invokeHistory(char* command);
+int invokeHistory(char* commandLine);
 
 int main (){
   //Load history from file.
@@ -24,14 +24,14 @@ int main (){
   first -> pathC = 1;
   PathArray[0] = first;
 
-  int replayHistory = 1;
+  int replayHistory = 0;
   //Each time user enters a new command.
   char* commandLine;
   char* command;
-  struct Hline* currentCmd;
+  struct Hline* commandNode;
   while(1){
     printf(">> ");
-    if (replayHistory == 1){
+    if (replayHistory == 0){
       //Store commandLine. Assume max of 1024.
       commandLine = (char*)malloc(MAXLINE);
       fgets(commandLine, MAXLINE, stdin);
@@ -40,19 +40,32 @@ int main (){
         free(commandLine);
         continue;
       }
+    }
+
+    //If we are invoking past history, go through loop but set vars from history.
+    if(invokeHistory(commandLine)){
+      replayHistory = 1;
+      int commandNumber = invokeHistory(commandLine);
+      commandNode = findHistoryNode(front, commandNumber);
+      if(commandNode == NULL){
+        printf("No command found for history number: %d\n", invokeHistory(commandLine));
+        replayHistory = 0;
+        continue;
+      }
+      command = commandNode->argv[0];
+      commandLine = cmdLine(commandNode);
+    }
+
+    if(replayHistory == 0){
       //Also save to history file.
       appendCommand(commandLine);
       // Parse it into history linked list.
       command = addList(commandLine, front);
-      currentCmd = backList(front);
+      commandNode = backList(front);
     }
 
-    if(invokeHistory(command)){
-      //Check if we are repeating history.
-      printf("%s,%d",command, invokeHistory(command));
-    }
     //Begin checking built in commands.
-    else if(!strcmp(command, "history")){
+    if(!strcmp(command, "history")){
       printHistory(front);
     }
 
@@ -72,7 +85,7 @@ int main (){
     }
 
     else if(!strcmp(command, "cd")){
-      if(chdir(currentCmd->argv[1]) == -1){
+      if(chdir(commandNode->argv[1]) == -1){
         printf("qksh: %s: error changing directory\n", front->argv[1]);
       }
     }
@@ -91,15 +104,17 @@ int main (){
         printf("%s is an external command (%s)\n",command, foundDirectory);
         printf("command arguments:\n");
         for(int i = 1; i< PATHCOUNT; i++){
-          if(currentCmd->argv[i] == NULL){
+          if(commandNode->argv[i] == NULL){
             break;
           }
-          printf("%s\n", currentCmd->argv[i]);
+          printf("%s\n", commandNode->argv[i]);
         }
       }
       free(foundDirectory);
     }
     free(commandLine);
+    //We only replay History once.
+    replayHistory = 0;
   }
 
 }
@@ -113,9 +128,9 @@ int emptyString(char * string){
   return(1);
 }
 
-int invokeHistory(char* command){
-  if(*command == '!'){
-    return(atoi(command+1));
+int invokeHistory(char* commandLine){
+  if(*commandLine == '!'){
+    return(atoi(commandLine+1));
   } else {
     return(0);
   }

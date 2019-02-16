@@ -118,3 +118,29 @@ struct Hline* backList(struct Hline* front){
   }
   return front;
 }
+
+struct Hline* findHistoryNode(struct Hline* front, int n){
+  for(int i = 1;front -> next != NULL; i++){
+    if(i == n){
+      return(front);
+    }
+    front = front -> next;
+  }
+  return(NULL);
+}
+
+char* cmdLine(struct Hline* cmd){
+  char * commandLine = (char *)calloc(MAXLINE, sizeof(char));
+  char * space = (char *)malloc(2);
+  *space = ' ';
+  *(space+1) = '\0';
+  for(int i = 0; i < ARGCOUNT && cmd->argv[i] != NULL; i++){
+    strcat(commandLine, cmd->argv[i]);
+    //Dont insert space in last value
+    if(cmd->argv[i+1] != NULL){
+      strcat(commandLine, space);
+    }
+  }
+  free(space);
+  return(commandLine);
+}
