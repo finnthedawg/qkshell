@@ -14,7 +14,7 @@ void setPath(struct Path** Paths, char* commandLine){
   //Break up commandLine.
   char* Pname = strtok(NULL, "=");
   if(strlen(Pname) == 0){
-    printf("Please specify a path name after export.");
+    printf("Please specify a path name after export.\n");
     return;
   } else {
     Pname = strdup(Pname);
@@ -22,7 +22,7 @@ void setPath(struct Path** Paths, char* commandLine){
 
   char* Pval = strtok(NULL, "\0");
   if(Pval == NULL || strlen(Pval) == 0){
-    printf("Please specify values for your path using =p1:p2:p3");
+    printf("Please specify values for your path using =p1:p2:p3\n");
     return;
   } else {
     Pval = strdup(Pval);
@@ -51,9 +51,27 @@ void setPath(struct Path** Paths, char* commandLine){
     }
   }
   //Paths are full
-  printf("You have too many paths set");
+  printf("You have too many paths set\n");
   return;
 
+}
+
+void destructPaths(struct Path** PathArray){
+  for(int i = 0; i<PATHCOUNT; i++){
+    destructNode(PathArray[i]);
+  }
+  return;
+}
+
+void destructNode(struct Path* node){
+  if(node == NULL){
+    return;
+  }
+  for (int i = 0; i<PATHCOUNT; i++){
+    free(node -> argv[i]);
+  }
+  free(node);
+  return;
 }
 
 void setNode(struct Path* target, char* Paths){

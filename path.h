@@ -18,6 +18,12 @@ void setPath(struct Path** Paths, char* commandLine);
 //SetNode of a target path node with the Paths as a string.
 void setNode(struct Path* target, char* Paths);
 
+//Deletes the array of Paths.
+void destructPaths(struct Path** PathArray);
+
+//Deletes one node
+void destructNode(struct Path* node);
+
 //Check for command file within PATH array values.
 //Returns the directory where it is found
 //Returns NULL if file not found
@@ -27,9 +33,11 @@ char* findCmd(struct Path** PathArray, char* file);
 
 //Prings the target node. 0 for success, 1 for FAIL
 int printPathNode(struct Path* target);
+
 //Creates a empty Path node.
 //Returns pointer to Path node
 struct Path* newPath();
+
 //Return pointer to Path from Path array that matches Pvar
 //Returns NULL if none found.
 struct Path* findPath(struct Path** Paths, char* Pvar, int size);

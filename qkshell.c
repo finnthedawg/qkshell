@@ -10,7 +10,6 @@
 #define MAXLINE 1024
 
 int emptyString(char * string);
-void exitShell();
 
 int main (){
   //Load history from file.
@@ -66,8 +65,10 @@ int main (){
       }
     }
     else if(!strcmp(command, "exit")){
+      destructList(front);
+      destructPaths(PathArray);
       free(commandLine);
-      void exitShell();
+      break;
     }
     //Check system commands in paths.
     else{
@@ -89,9 +90,6 @@ int main (){
     free(commandLine);
   }
 
-  //Prints the history
-  printHistory(front);
-
 }
 
 int emptyString(char * string){
@@ -101,8 +99,4 @@ int emptyString(char * string){
     }
   }
   return(1);
-}
-
-void exitShell(){
-  return;
 }

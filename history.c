@@ -88,10 +88,27 @@ struct Hline* newHline(){
   newHline -> next = NULL;
   newHline -> argc = 0;
   //Sets command text pointers to NULL
-  for (int i = 0; i<32; i++){
+  for (int i = 0; i<ARGCOUNT; i++){
     newHline -> argv[i] = NULL;
   }
   return(newHline);
+}
+
+void destructHline(struct Hline* node){
+  for (int i = 0; i<ARGCOUNT; i++){
+    free(node -> argv[i]);
+  }
+  free(node);
+}
+
+void destructList(struct Hline* front){
+  struct Hline* seek;
+  while(front->next != NULL ){
+    seek = front->next;
+    destructHline(front);
+    front = seek;
+  }
+  destructHline(front);
 }
 
 //Returns a pointer to the last struct in command list.
