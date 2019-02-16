@@ -1,12 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <unistd.h>
 
 #include "history.h"
 #include "path.h"
 
 #define MAXLINE 1024
+
+int emptyString(char * string);
+void exitShell();
 
 int main (){
   //Load history from file.
@@ -27,6 +31,10 @@ int main (){
     char* commandLine = (char*)malloc(MAXLINE);
     fgets(commandLine, MAXLINE, stdin);
     strtok(commandLine, "\n");
+    if(emptyString(commandLine)){
+      free(commandLine);
+      continue;
+    }
     //Also save to history file.
     appendCommand(commandLine);
     // Parse it into history linked list, and store argv
@@ -57,6 +65,10 @@ int main (){
         printf("qksh: %s: error changing directory\n", front->argv[1]);
       }
     }
+    else if(!strcmp(command, "exit")){
+      free(commandLine);
+      void exitShell();
+    }
     //Check system commands in paths.
     else{
       char * foundDirectory = findCmd(PathArray, command);
@@ -72,8 +84,8 @@ int main (){
           printf("%s\n", backList(front)->argv[i]);
         }
       }
+      free(foundDirectory);
     }
-
     free(commandLine);
   }
 
@@ -81,4 +93,16 @@ int main (){
   printHistory(front);
 
 }
-//exit
+
+int emptyString(char * string){
+  for(int i = 0; i <MAXLINE && i<strlen(string); i++){
+    if(!isspace(*(string+i))){
+      return(0);
+    }
+  }
+  return(1);
+}
+
+void exitShell(){
+  return;
+}

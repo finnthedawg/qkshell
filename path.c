@@ -102,10 +102,15 @@ int printPathNode(struct Path* target){
 
 char* findCmd(struct Path** PathArray, char* file){
   for(int i = 0; i<PATHCOUNT && PathArray[i] != NULL; i++){
-    for(int j = 0; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
-      if(access(PathArray[i]->argv[j], F_OK) != -1){
-        return(PathArray[i]->argv[j]);
+    for(int j = 1; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
+      char * filePath = (char*)malloc(strlen(PathArray[i]->argv[j]) + strlen(file));
+      filePath = strcat(filePath,PathArray[i]->argv[j]);
+      filePath = strcat(filePath,"/");
+      filePath = strcat(filePath,file);
+      if(access(filePath, F_OK) == 0){
+        return(filePath);
       }
+      free(filePath);
     }
   }
   return NULL;
