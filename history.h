@@ -30,7 +30,7 @@ char* cmdLine(struct Hline* cmd);
 
 //Appends entered command to file.
 //Adds a "\n after command";
-void appendCommand(char* commandLine);
+void appendCommand(char* historyDirectory, char* commandLine);
 
 //Loads the history to linked list and return pointer to front of list.
 struct Hline* loadHistory();

@@ -1,4 +1,0 @@
-pwd
-cd h2/h3
-pwd
-cd h2/h3

@@ -47,10 +47,11 @@ void printHistory(struct Hline* front){
   }
 }
 
-void appendCommand(char* commandLine){
-  FILE *fp = fopen("history.txt","a");
+void appendCommand(char* historyDirectory, char* commandLine){
+  FILE *fp = fopen(historyDirectory,"a");
   fprintf(fp,"%s\n",commandLine);
   fclose(fp);
+
 }
 
 struct Hline* loadHistory(){

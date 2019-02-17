@@ -24,6 +24,11 @@ int main (){
   first -> pathC = 1;
   PathArray[0] = first;
 
+  //Remember where the history is located.
+  char* historyDirectory = (char*)malloc(MAXLINE);
+  historyDirectory = getcwd(historyDirectory, MAXLINE);
+  strcat(historyDirectory, "/history.txt");
+
   int replayHistory = 0;
   //Each time user enters a new command.
   char* commandLine;
@@ -58,7 +63,7 @@ int main (){
 
     if(replayHistory == 0){
       //Also save to history file.
-      appendCommand(commandLine);
+      appendCommand(historyDirectory, commandLine);
       // Parse it into history linked list.
       command = addList(commandLine, front);
       commandNode = backList(front);
@@ -117,7 +122,7 @@ int main (){
     //We only replay History once.
     replayHistory = 0;
   }
-
+  free(historyDirectory);
 }
 
 int emptyString(char * string){
