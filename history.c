@@ -75,7 +75,8 @@ void printHline(struct Hline* node){
   if(node == NULL){
     printf("NULL node\n");
   } else {
-    for (int i = 0; i<ARGCOUNT && node -> argv[i] != NULL; i++){
+    int i;
+    for (i = 0; i<ARGCOUNT && node -> argv[i] != NULL; i++){
       printf("%s ", node -> argv[i]);
     }
   }
@@ -88,14 +89,16 @@ struct Hline* newHline(){
   newHline -> next = NULL;
   newHline -> argc = 0;
   //Sets command text pointers to NULL
-  for (int i = 0; i<ARGCOUNT; i++){
+  int i;
+  for (i = 0; i<ARGCOUNT; i++){
     newHline -> argv[i] = NULL;
   }
   return(newHline);
 }
 
 void destructHline(struct Hline* node){
-  for (int i = 0; i<ARGCOUNT; i++){
+  int i;
+  for (i = 0; i<ARGCOUNT; i++){
     free(node -> argv[i]);
   }
   free(node);
@@ -120,7 +123,8 @@ struct Hline* backList(struct Hline* front){
 }
 
 struct Hline* findHistoryNode(struct Hline* front, int n){
-  for(int i = 1;front -> next != NULL; i++){
+  int i;
+  for(i = 1;front -> next != NULL; i++){
     if(i == n){
       return(front);
     }
@@ -134,7 +138,8 @@ char* cmdLine(struct Hline* cmd){
   char * space = (char *)malloc(2);
   *space = ' ';
   *(space+1) = '\0';
-  for(int i = 0; i < ARGCOUNT && cmd->argv[i] != NULL; i++){
+  int i;
+  for(i = 0; i < ARGCOUNT && cmd->argv[i] != NULL; i++){
     strcat(commandLine, cmd->argv[i]);
     //Dont insert space in last value
     if(cmd->argv[i+1] != NULL){

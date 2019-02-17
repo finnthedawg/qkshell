@@ -103,7 +103,8 @@ int main (){
       } else {
         printf("%s is an external command (%s)\n",command, foundDirectory);
         printf("command arguments:\n");
-        for(int i = 1; i< PATHCOUNT; i++){
+        int i;
+        for(i = 1; i< PATHCOUNT; i++){
           if(commandNode->argv[i] == NULL){
             break;
           }
@@ -120,7 +121,8 @@ int main (){
 }
 
 int emptyString(char * string){
-  for(int i = 0; i <MAXLINE && i<strlen(string); i++){
+  int i;
+  for(i = 0; i <MAXLINE && i<strlen(string); i++){
     if(!isspace(*(string+i))){
       return(0);
     }

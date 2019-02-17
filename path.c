@@ -31,7 +31,8 @@ void setPath(struct Path** Paths, char* commandLine){
   free(commandLineDup);
 
   //Now find the respective struct Path* from the Path array. Or give the next empty one.
-  for(int i = 0; i < PATHCOUNT; i++){
+  int i;
+  for(i = 0; i < PATHCOUNT; i++){
     if(Paths[i] == NULL){
       Paths[i] = newPath();
       Paths[i]->argv[0] = Pname;
@@ -57,7 +58,8 @@ void setPath(struct Path** Paths, char* commandLine){
 }
 
 void destructPaths(struct Path** PathArray){
-  for(int i = 0; i<PATHCOUNT; i++){
+  int i;
+  for(i = 0; i<PATHCOUNT; i++){
     destructNode(PathArray[i]);
   }
   return;
@@ -67,7 +69,8 @@ void destructNode(struct Path* node){
   if(node == NULL){
     return;
   }
-  for (int i = 0; i<PATHCOUNT; i++){
+  int i;
+  for (i = 0; i<PATHCOUNT; i++){
     free(node -> argv[i]);
   }
   free(node);
@@ -90,14 +93,16 @@ struct Path* newPath(){
   newPath = (struct Path *)malloc(sizeof(struct Path));
   newPath -> pathC = 0;
   //Sets directories related to this path to NULL for now.
-  for (int i = 0; i<PATHCOUNT; i++){
+  int i;
+  for (i = 0; i<PATHCOUNT; i++){
     newPath -> argv[i] = NULL;
   }
   return(newPath);
 }
 
 void printPath(struct Path** PathArray){
-  for(int i = 0; i<PATHCOUNT; i++){
+  int i;
+  for(i = 0; i<PATHCOUNT; i++){
     if(printPathNode(PathArray[i]) == 1){
       break;
     }
@@ -110,7 +115,8 @@ int printPathNode(struct Path* target){
     return(1);
   } else {
     printf("%s=", target -> argv[0]);
-    for (int i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
+    int i;
+    for (i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
       (target -> argv[i+1] != NULL ? printf("%s:", target -> argv[i]) : printf("%s", target -> argv[i]));
     }
     printf("\n");
@@ -119,8 +125,10 @@ int printPathNode(struct Path* target){
 }
 
 char* findCmd(struct Path** PathArray, char* file){
-  for(int i = 0; i<PATHCOUNT && PathArray[i] != NULL; i++){
-    for(int j = 1; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
+  int i;
+  for(i = 0; i<PATHCOUNT && PathArray[i] != NULL; i++){
+    int j;
+    for(j = 1; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
       char * filePath = (char*)malloc(strlen(PathArray[i]->argv[j]) + strlen(file));
       filePath = strcat(filePath,PathArray[i]->argv[j]);
       filePath = strcat(filePath,"/");
@@ -135,7 +143,8 @@ char* findCmd(struct Path** PathArray, char* file){
 }
 
 struct Path* findPath(struct Path** Paths, char* Pvar, int size){
-  for(int i = 0; i< size; i++){
+  int i;
+  for(i = 0; i< size; i++){
     if(!strcmp(Paths[i] -> argv[0], Pvar)){
       return(Paths[i]);
     }
