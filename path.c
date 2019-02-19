@@ -13,7 +13,7 @@ void setPath(struct Path** Paths, char* commandLine){
 
   //Break up commandLine.
   char* Pname = strtok(NULL, "=");
-  if(strlen(Pname) == 0){
+  if(Pname == NULL || strlen(Pname) == 0){
     printf("Please specify a path name after export.\n");
     return;
   } else {

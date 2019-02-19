@@ -131,6 +131,9 @@ struct Hline* findHistoryNode(struct Hline* front, int n){
     }
     front = front -> next;
   }
+  if(i == n){
+    return (front);
+  }
   return(NULL);
 }
 
