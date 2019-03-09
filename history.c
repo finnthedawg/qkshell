@@ -4,6 +4,39 @@
 
 #include "history.h"
 
+//Parses line and breaks it up by pipes.
+void addLineHcommand(char * commandLine, struct Hcommand* front){
+  char * commandLineDup = strdup(commandLine);
+  struct Hcommand* latest;
+  //Edge case if history is empty.
+  if(front -> argc == 0){
+    latest = front;
+  } else {
+    latest = newHcommand();
+    struct Hcommand * back = CommandBackList(front);
+    back -> next = latest;
+  }
+
+  //Break up the the line into individual commands based on |
+  char* command = strsep(&commandLineDup, "|");
+  //Because addList also utilizes strtok.
+  while(command != NULL){
+    //We are storing the command
+    struct Hline* newCommandHline =  newHline();
+    latest -> command[latest -> argc] = newCommandHline;
+    addList(command, latest -> command[latest->argc]);
+    //Increase the number of piped commands we have in Hcommand List.
+    //struct Hline* command[ARGCOUNT];
+    latest->argc ++;
+    command = strsep(&commandLineDup,"|");
+  }
+  return;
+}
+
+
+//Parses line and adds argvs to command history list.
+//Returns pointer to argvs.
+//Inserts /0 into commandLine string's delimiters.
 char* addList(char* commandLine, struct Hline* front){
   char * commandLineDup = strdup(commandLine);
   struct Hline* latest;
@@ -15,6 +48,7 @@ char* addList(char* commandLine, struct Hline* front){
     struct Hline* back = backList(front);
     back->next = latest;
   }
+
   //Populate the struct with recieved values.
   char* command = strtok(commandLineDup, " ");
   //Store value of first command.
@@ -28,7 +62,39 @@ char* addList(char* commandLine, struct Hline* front){
   return(first);
 }
 
+//Prints the piped command history given the command.
+void printCommandHistory(struct Hcommand * frontCommandLine){
+  if(frontCommandLine == NULL){
+    printf("There is no history set");
+  } else{
+    //This counts each commandLine
+    int count = 1;
+    while(1){
+      //Increment each command per line.
+      int i = 0;
+      printf("%d ", count);
+      //For each command we call printline
+      printHline(frontCommandLine -> command[i]);
+      while(frontCommandLine -> command[i+1] != NULL && printf("| ")){
+        i++;
+        printHline(frontCommandLine -> command[i]);
+      }
+      printf("\n");
+      //Move the current front as we print
+      if(frontCommandLine -> next == NULL){
+        break;
+      } else {
+        frontCommandLine = frontCommandLine -> next;
+      }
+      //Increment to next commandLine
+      count ++;
+    }
 
+  }
+}
+
+
+//Prints the history given the front of the command..
 void printHistory(struct Hline* front){
   if(front == NULL){
     printf("There is no history yet.\n");
@@ -47,6 +113,8 @@ void printHistory(struct Hline* front){
   }
 }
 
+//Appends entered command to file.
+//Adds a "\n after command";
 void appendCommand(char* historyDirectory, char* commandLine){
   FILE *fp = fopen(historyDirectory,"a");
   fprintf(fp,"%s\n",commandLine);
@@ -83,18 +151,35 @@ void printHline(struct Hline* node){
   }
 }
 
-//Constructor initializes a command line struct.
+//Constructor initializes a command node struct.
 struct Hline* newHline(){
   struct Hline* newHline;
   newHline = (struct Hline *)malloc(sizeof(struct Hline));
   newHline -> next = NULL;
   newHline -> argc = 0;
-  //Sets command text pointers to NULL
+  newHline -> infilename = NULL;
+  newHline -> outfilename = NULL;
+  newHline -> fdOut = 0;
+  //Sets argv text pointers to NULL
   int i;
   for (i = 0; i<ARGCOUNT; i++){
     newHline -> argv[i] = NULL;
   }
   return(newHline);
+}
+
+//Store our struct with various piped commands here.
+struct Hcommand* newHcommand(){
+  struct Hcommand* newHcommand;
+  newHcommand = (struct Hcommand *)malloc(sizeof(struct Hcommand));
+  newHcommand -> argc = 0;
+  newHcommand -> next = NULL;
+  //We dont have any commands in our Hcommand line. We set each it NULL
+  int i;
+  for (i = 0; i<ARGCOUNT; i++){
+    newHcommand -> command[i] = NULL;
+  }
+  return newHcommand;
 }
 
 void destructHline(struct Hline* node){
@@ -113,6 +198,14 @@ void destructList(struct Hline* front){
     front = seek;
   }
   destructHline(front);
+}
+
+//Returns the last commandLine in command List.
+struct Hcommand* CommandBackList(struct Hcommand* front){
+  while(front->next != NULL){
+    front = front->next;
+  }
+  return front;
 }
 
 //Returns a pointer to the last struct in command list.

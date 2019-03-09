@@ -1,16 +1,47 @@
 #  :sparkles:qkshell :sparkles:
-Custom Unix CLI shell written in the C language.
+An implementation of a Unix shell written in C.
 
 ---
 
-## quickshell features
+## To run the project:
 
-* **pwd** - Print working directory.
+```
+> git clone
+> make
+> ./sh
+```
+Make sure you have GCC version 4.3+
 
-* **cd** - Change current directory.
+## qkshell built in features:
 
-* **export** - List exported shell variables.
+* `pwd` Prints working directory.
 
-* **history** - Display the command history and line numbers.
+* `cd [args]` - Change the working directory of qkshell
 
-* **exit** - Free memory and exit.
+* `history` - Lists the history of commands that have been executed.
+```
+history
+1 history
+2 ls
+3 export
+4 export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+5 export
+6 ls -l -a
+```
+
+* `![number]` Recalls the command from history and executes it.
+
+* `export [PATH]=[/directory1:/directory2]` - Export the path variables to qkshell. e.g `export JAVA_PATH=/home/test/java/bin`.
+Without specifying arguments, export will return a list of currently exported variables.
+
+* `[External-command]` checks the external command within path variables, returns the location found:
+```
+ls is an external command (/usr/bin/ls)
+command arguments:
+-l
+-a
+```
+
+* `exit` - Free allocated memory and exit.
+
+* Todo: `special symbols`, `pipes`, `Output redirection` `Input redirection` `Shell variables` 
