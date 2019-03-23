@@ -13,7 +13,7 @@ void setPath(struct Path** Paths, char* commandLine){
 
   //Break up commandLine.
   char* Pname = strtok(NULL, "=");
-  if(strlen(Pname) == 0){
+  if(Pname == NULL || strlen(Pname) == 0){
     printf("Please specify a path name after export.\n");
     return;
   } else {
@@ -130,6 +130,7 @@ char* findCmd(struct Path** PathArray, char* file){
     int j;
     for(j = 1; j<PATHCOUNT && PathArray[i]->argv[j] != NULL; j++){
       char * filePath = (char*)malloc(strlen(PathArray[i]->argv[j]) + strlen(file));
+      memset(filePath,0, sizeof(char) * (strlen(PathArray[i]->argv[j]) + strlen(file)));
       filePath = strcat(filePath,PathArray[i]->argv[j]);
       filePath = strcat(filePath,"/");
       filePath = strcat(filePath,file);

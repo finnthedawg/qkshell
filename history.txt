@@ -1,0 +1,6 @@
+ls
+history
+history
+ls
+history
+123 | 234

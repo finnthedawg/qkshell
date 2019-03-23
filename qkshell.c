@@ -13,12 +13,17 @@ int emptyString(char * string);
 int invokeHistory(char* commandLine);
 
 int main (){
+  //Lets start the command Line struct;
+  struct Hcommand* frontCommandLine = newHcommand();
+
   //Load history from file.
   struct Hline* front = loadHistory();
 
-  //Store paths and init first to "PATH="
+  //Store paths and init first to nlll.
   struct Path* PathArray[PATHCOUNT] = {NULL};
+  //Creates a empty Path node, struct PATH.
   struct Path* first = newPath();
+  //This is the first path.
   char * tempPath = strdup("PATH");
   first -> argv[0] = tempPath;
   first -> pathC = 1;
@@ -62,9 +67,12 @@ int main (){
     }
 
     if(replayHistory == 0){
-      //Also save to history file.
+      //Write the line to the history file.
       appendCommand(historyDirectory, commandLine);
+
       // Parse it into history linked list.
+      addLineHcommand(commandLine, frontCommandLine);
+      printCommandHistory(frontCommandLine);
       command = addList(commandLine, front);
       commandNode = backList(front);
     }
