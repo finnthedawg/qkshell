@@ -133,6 +133,13 @@ int main (){
         else if(!strcmp(commandNode -> command[i] -> argv[0], "cd")){
           if(chdir(commandNode->command[0]->argv[1]) == -1){
             printf("qksh: %s: error changing directory\n", frontCommandLine->command[0]->argv[1]);
+          } else {
+            char* wd = (char*)malloc(MAXLINE);
+            wd = getcwd(wd, MAXLINE);
+            char* newPWDPath = (char*)calloc(1024,sizeof(char));
+            strcat(newPWDPath, "export PWD=");
+            strcat(newPWDPath, wd);
+            setPath(PathArray, newPWDPath);
           }
           continue;
         }

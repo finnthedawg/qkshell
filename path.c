@@ -4,6 +4,8 @@
 #include <string.h>
 #include <unistd.h>
 
+
+//TODO: Make setPath delete the original paths.
 void setPath(struct Path** Paths, char* commandLine){
   //So we don't modify original commandLine
   char* commandLineDup = strdup(commandLine);
@@ -78,6 +80,18 @@ void destructNode(struct Path* node){
 }
 
 void setNode(struct Path* target, char* Paths){
+  //Clear the target path node
+  //Because shell should overwrite when you set variables.
+  printf("Testing target %s", target -> argv[0]);
+  int i = 1;
+  while (target -> argv[i] != NULL){
+    free(target -> argv[i]);
+    target -> argv[i] = NULL;
+    i++;
+  }
+  target -> pathC = 1;
+
+  //Break up the entered Paths.
   char* Pval = strtok(Paths, ":");
   while(Pval != NULL && strlen(Pval) != 0){
     Pval = strdup(Pval);
