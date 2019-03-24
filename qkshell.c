@@ -17,7 +17,7 @@ int emptyString(char * string); //Check
 //Returns the history number of a !34, or 0 if there is no invoking of history
 int invokeHistory(char* commandLine);
 //Expands our string by expanding PATH variables and PWD variable.
-char* expandVariable(char *string, struct Path* PathArray, char* PWDvariable);
+char* expandVariable(char *string, struct Path** PathArray, char* PWDvariable);
 
 int main (){
   //This is the linked list of piped commands
@@ -34,7 +34,7 @@ int main (){
   PathArray[0] = first;
   //This is the PWDvariable.
   char * PWDvariable = (char*)malloc(MAXLINE);
-  PWDvariable = getcwd(historyDirectory, MAXLINE);
+  PWDvariable = getcwd(PWDvariable, MAXLINE);
 
   //Remember where the history.txt is located.
   char* historyDirectory = (char*)malloc(MAXLINE);
@@ -104,7 +104,7 @@ int main (){
 
       //Scan through the arguments and expand the variables.
       for (j = 0; commandNode -> command[i] -> argv[j] != NULL; j++){
-        expandVariable(commandNode -> command[i] -> argv[j]);
+        expandVariable(commandNode -> command[i] -> argv[j],PathArray,PWDvariable);
       }
 
       //If we only have one command, then run it.
@@ -202,8 +202,14 @@ int main (){
 }
 
 //Expands our string by expanding PATH variables and PWD variable.
-char* expandVariable(char *string, struct Path* PathArray, char* PWDvariable){
-  if strstr()
+char* expandVariable(char *string, struct Path** PathArray, char* PWDvariable){
+  char * front = strstr(string, "$PWD");
+  if (front != NULL){
+    //Front of shell variable.
+    int posA = front - string;
+    int posB = posA + 4;
+    printf("Start: %d, end: %d", posA, posB);
+  }
 }
 
 //If string doesnt have space, return 0 else return 1
