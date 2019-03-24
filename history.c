@@ -261,7 +261,7 @@ struct Hline* backList(struct Hline* front){
 }
 
 //Gets the history node including piped commands.
-struct Hcommand* findHistoryNode2(struct Hcommand* front, int n){
+struct Hcommand* findHistoryPiped(struct Hcommand* front, int n){
   int i;
   for(i = 1;front -> next != NULL; i++){
     if(i == n){
@@ -275,19 +275,6 @@ struct Hcommand* findHistoryNode2(struct Hcommand* front, int n){
   return(NULL);
 }
 
-struct Hline* findHistoryNode(struct Hline* front, int n){
-  int i;
-  for(i = 1;front -> next != NULL; i++){
-    if(i == n){
-      return(front);
-    }
-    front = front -> next;
-  }
-  if(i == n){
-    return (front);
-  }
-  return(NULL);
-}
 
 char* cmdLine(struct Hline* cmd){
 

@@ -12,8 +12,12 @@
 
 #define MAXLINE 1024
 
-int emptyString(char * string);
+//If string doesnt have space, return 0 else return 1
+int emptyString(char * string); //Check
+//Returns the history number of a !34, or 0 if there is no invoking of history
 int invokeHistory(char* commandLine);
+//Expands our string by expanding PATH variables and PWD variable.
+char* expandVariable(char *string, struct Path* PathArray, char* PWDvariable);
 
 int main (){
   //This is the linked list of piped commands
@@ -28,8 +32,11 @@ int main (){
   first -> argv[0] = tempPath;
   first -> pathC = 1;
   PathArray[0] = first;
+  //This is the PWDvariable.
+  char * PWDvariable = (char*)malloc(MAXLINE);
+  PWDvariable = getcwd(historyDirectory, MAXLINE);
 
-  //Remember where the history is located.
+  //Remember where the history.txt is located.
   char* historyDirectory = (char*)malloc(MAXLINE);
   historyDirectory = getcwd(historyDirectory, MAXLINE);
   strcat(historyDirectory, "/history.txt");
@@ -41,6 +48,7 @@ int main (){
   struct Hcommand* commandNode; //This is the piped command in Hcommand format.
   while(1){
     printf(">> ");
+    //If we are not replaying history, we can simply run this.
     if (replayHistory == 0){
       //Store commandLine. Assume max of 1024.
       commandLine = (char*)malloc(MAXLINE);
@@ -56,7 +64,7 @@ int main (){
     if(invokeHistory(commandLine)){
       replayHistory = 1;
       int commandNumber = invokeHistory(commandLine); //Gets the command number from our entered command.
-      commandNode = findHistoryNode2(frontCommandLine, commandNumber);
+      commandNode = findHistoryPiped(frontCommandLine, commandNumber);
       if(commandNode == NULL){
         printf("No command found for history number: %d\n", invokeHistory(commandLine));
         replayHistory = 0;
@@ -67,6 +75,7 @@ int main (){
       commandLine = cmdLine(commandNode -> command[0]);
     }
 
+    //If we are not invoking history, then we set the correct data structures to our read commandLine.
     if(replayHistory == 0){
       //Write the line to the history file.
       appendCommand(historyDirectory, commandLine);
@@ -77,15 +86,46 @@ int main (){
       command = strdup(commandNode -> command[0] -> argv[0]);
     }
 
-    //Now we check for piped commands.
+    if(!strcmp(command, "exit")){
+      destructList(frontCommandLine);
+      free(historyDirectory);
+      free(commandLine);
+      return(0);
+    }
+
+    //Now we check the piped commands.
     int p[2]; //This is our pipe.
     pid_t pid; //Process ID
     int fd_in = 0; //The input filedescriptor
 
-    int i;
-    //While we have commands,
+    int i, j;
+    //While our commandNode contains commands
     for (i = 0; commandNode -> command[i] != NULL; i++){
-      //If our command has
+
+      //Scan through the arguments and expand the variables.
+      for (j = 0; commandNode -> command[i] -> argv[j] != NULL; j++){
+        expandVariable(commandNode -> command[i] -> argv[j]);
+      }
+
+      //If we only have one command, then run it.
+      //We only need to do this for commands (export and cd) that change the environment varables.
+      if(i == 0 && commandNode -> command[1] == NULL){
+        if(!strcmp(commandNode -> command[i] -> argv[0], "export")){
+          //If only export, then we print the exported paths.
+          if(!strcmp(commandLine, "export")){
+            printPath(PathArray);
+          } else {
+            setPath(PathArray, commandLine);
+          }
+          continue;
+        }
+        else if(!strcmp(commandNode -> command[i] -> argv[0], "cd")){
+          if(chdir(commandNode->command[0]->argv[1]) == -1){
+            printf("qksh: %s: error changing directory\n", frontCommandLine->command[0]->argv[1]);
+          }
+          continue;
+        }
+      }
 
       pipe(p); //Create the pipe for communication.
       //The child process.
@@ -113,8 +153,42 @@ int main (){
             dup2(infd, commandNode -> command[i] -> fdOut); //Set the stream we want to the output file's fd.
           }
         }
-        execvp(commandNode -> command[i] -> argv[0], commandNode -> command[i] -> argv);
-      } else{ //The parent process.
+        //Here we should check for built in commands.
+        if(!strcmp(commandNode -> command[i] -> argv[0], "history")){
+          printCommandHistory(frontCommandLine);
+          return(0);
+        }
+        else if(!strcmp(commandNode -> command[i] -> argv[0], "export")){
+          //If only export, then we print the exported paths.
+          if(!strcmp(commandLine, "export")){
+            printPath(PathArray);
+          } else {
+            setPath(PathArray, commandLine);
+          }
+          return(0);
+        }
+        else if(!strcmp(commandNode -> command[i] -> argv[0], "pwd")){
+          char* wd = (char*)malloc(MAXLINE);
+          wd = getcwd(wd, MAXLINE);
+          printf("%s\n",wd);
+          return(0);
+        }
+        else if(!strcmp(commandNode -> command[i] -> argv[0], "cd")){
+          if(chdir(commandNode->command[0]->argv[1]) == -1){
+            printf("qksh: %s: error changing directory\n", frontCommandLine->command[0]->argv[1]);
+          }
+          return(0);
+        }
+        else{
+          char * foundDirectory = findCmd(PathArray, commandNode -> command[i] -> argv[0]);
+          if(foundDirectory == NULL){
+            printf("qksh: command %s not found\n", commandNode -> command[i] -> argv[0]);
+            return(0);
+          } else {
+            execvp(foundDirectory, commandNode -> command[i] -> argv);
+          }
+        }
+      } else{ //The "joining" process.
         wait(NULL); //Parent will wait for child to finish executing.
         close(p[1]); //Close the write end of pipe.
         fd_in = p[0]; //fd_in will be set to the read end of pipe. Next process will use this to set stdin.
@@ -122,63 +196,17 @@ int main (){
 
     }
 
-    //Begin checking built in commands.
-    if(!strcmp(command, "history")){
-      printCommandHistory(frontCommandLine);
-    }
-
-    else if(!strcmp(command, "export")){
-      //If only export, then we print the exported paths.
-      if(!strcmp(commandLine, "export")){
-        printPath(PathArray);
-      } else {
-        setPath(PathArray, commandLine);
-      }
-    }
-
-    else if(!strcmp(command, "pwd")){
-      char* wd = (char*)malloc(MAXLINE);
-      wd = getcwd(wd, MAXLINE);
-      printf("%s\n",wd);
-    }
-
-    else if(!strcmp(command, "cd")){
-      if(chdir(commandNode->command[0]->argv[1]) == -1){
-        printf("qksh: %s: error changing directory\n", frontCommandLine->command[0]->argv[1]);
-      }
-    }
-    else if(!strcmp(command, "exit")){
-      destructList(frontCommandLine);
-      //destructPaths(PathArray);
-      free(commandLine);
-      break;
-    }
-    //Check system commands in paths.
-    else{
-      char * foundDirectory = findCmd(PathArray, command);
-      if(foundDirectory == NULL){
-        printf("qksh: command %s not found\n", command);
-      } else {
-        printf("%s is an external command (%s)\n",command, foundDirectory);
-        printf("command arguments:\n");
-        int i;
-        for(i = 1; i< PATHCOUNT; i++){
-          if(commandNode->command[0]->argv[i] == NULL){
-            break;
-          }
-          printf("%s\n", commandNode->command[0]->argv[i]);
-        }
-      }
-      free(foundDirectory);
-    }
-    free(commandLine);
     //We only replay History once.
     replayHistory = 0;
   }
-  free(historyDirectory);
 }
 
+//Expands our string by expanding PATH variables and PWD variable.
+char* expandVariable(char *string, struct Path* PathArray, char* PWDvariable){
+  if strstr()
+}
 
+//If string doesnt have space, return 0 else return 1
 int emptyString(char * string){
   int i;
   for(i = 0; i <MAXLINE && i<strlen(string); i++){
@@ -189,6 +217,7 @@ int emptyString(char * string){
   return(1);
 }
 
+//Returns the history number of a !34, or 0 if there is no invoking of history
 int invokeHistory(char* commandLine){
   if(*commandLine == '!'){
     return(atoi(commandLine+1));

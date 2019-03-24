@@ -36,10 +36,8 @@ char* addList(char* commandLine,struct Hline* front);
 //Print the history including piped commands.
 void printCommandHistory(struct Hcommand * frontCommandLine);
 
-//returns the Nth node;
-struct Hline* findHistoryNode(struct Hline* front, int n);
-
-struct Hcommand* findHistoryNode2(struct Hcommand* front, int n);
+//Returns the nth piped command
+struct Hcommand* findHistoryPiped(struct Hcommand* front, int n);
 
 //returns the original command;
 char* cmdLine(struct Hline* cmd);
