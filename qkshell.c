@@ -17,7 +17,9 @@ int emptyString(char * string); //Check
 //Returns the history number of a !34, or 0 if there is no invoking of history
 int invokeHistory(char* commandLine);
 //Expands our string by expanding PATH variables and PWD variable.
-char* expandVariable(char *string, struct Path** PathArray, char* PWDvariable);
+//Returns NULL if no expanded string possible.
+//Returns a new expanded string otherwise.
+char* expandVariable(char *string, struct Path** PathArray);
 
 int main (){
   //This is the linked list of piped commands
@@ -27,14 +29,19 @@ int main (){
   struct Path* PathArray[PATHCOUNT] = {NULL};
   //Creates a empty Path node, struct PATH.
   struct Path* first = newPath();
-  //This is the first path.
   char * tempPath = strdup("PATH");
   first -> argv[0] = tempPath;
   first -> pathC = 1;
   PathArray[0] = first;
-  //This is the PWDvariable.
+  //Do this for PWD
+  struct Path* second = newPath();
+  char * PWDkey = strdup("PWD");
   char * PWDvariable = (char*)malloc(MAXLINE);
   PWDvariable = getcwd(PWDvariable, MAXLINE);
+  second -> argv[0] = PWDkey;
+  second -> argv[1] = PWDvariable;
+  second -> pathC = 2;
+  PathArray[1] = second;
 
   //Remember where the history.txt is located.
   char* historyDirectory = (char*)malloc(MAXLINE);
@@ -104,7 +111,11 @@ int main (){
 
       //Scan through the arguments and expand the variables.
       for (j = 0; commandNode -> command[i] -> argv[j] != NULL; j++){
-        expandVariable(commandNode -> command[i] -> argv[j],PathArray,PWDvariable);
+        char* newVariable = expandVariable(commandNode -> command[i] -> argv[j],PathArray);
+        if(newVariable != NULL){
+          free(commandNode -> command[i] -> argv[j]);
+          commandNode -> command[i] -> argv[j] = newVariable;
+        }
       }
 
       //If we only have one command, then run it.
@@ -201,16 +212,39 @@ int main (){
   }
 }
 
-//Expands our string by expanding PATH variables and PWD variable.
-char* expandVariable(char *string, struct Path** PathArray, char* PWDvariable){
-  char * front = strstr(string, "$PWD");
-  if (front != NULL){
-    //Front of shell variable.
-    int posA = front - string;
-    int posB = posA + 4;
-    printf("Start: %d, end: %d", posA, posB);
+//Expands the string based on our PATH and PWD variables.
+char* expandVariable(char *target, struct Path** PathArray){
+
+  //Check for PathArrays
+  int posA; //Position of before the variable
+  int posB;  //Position of after the variable.
+  char* expansionKey = (char*)calloc(1024, sizeof(char));
+  int i;
+  for (i = 0; PathArray[i] != NULL; i++ ){
+    //Set the expansion key to something like $PATH
+    strcat(expansionKey, "$");
+    strcat(expansionKey, PathArray[i]->argv[0]);
+    char* nodeVal = getNodeVal(PathArray[i]);
+    char* front = strstr(target, expansionKey);
+    //If we have found something, front wont be NULL.
+    if (front != NULL){
+      posA = front - target;
+      posB = posA + strlen(expansionKey);
+      char* expandedString = (char*)calloc(1024, sizeof(char));
+      strncat(expandedString, target, posA);
+      strcat(expandedString, nodeVal);
+      strcat(expandedString, target+posB);
+      //printf("Copied %s\n", expandedString);
+      return(expandedString);
+    }
+    free(nodeVal);
+    memset(expansionKey, 0, 1024);
   }
+  //We didn't manage to discover a expandable variable.
+  return(NULL);
+
 }
+
 
 //If string doesnt have space, return 0 else return 1
 int emptyString(char * string){

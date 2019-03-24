@@ -124,6 +124,19 @@ int printPathNode(struct Path* target){
   return(0);
 }
 
+char* getNodeVal(struct Path* target){
+  char* pathVal = (char*)malloc(MAXLINE);
+  if(target == NULL){
+    return(NULL);
+  } else {
+    int i;
+    for (i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
+      (target -> argv[i+1] != NULL ? strcat(pathVal,target -> argv[i]) || strcat(pathVal,":") : strcat(pathVal,target -> argv[i]) || NULL);
+    }
+    return(pathVal);
+  }
+}
+
 char* findCmd(struct Path** PathArray, char* file){
   int i;
   for(i = 0; i<PATHCOUNT && PathArray[i] != NULL; i++){

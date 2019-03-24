@@ -1,6 +1,7 @@
 #ifndef PATH_H
 #define PATH_H
 #define PATHCOUNT 32
+#define MAXLINE 1024
 
 //Struct defining each path in history,
 struct Path {
@@ -8,9 +9,6 @@ struct Path {
   //Each PATH can have 32 directories.
   char* argv[PATHCOUNT];
 };
-
-//Prints the paths given the array of paths.
-void printPath(struct Path** target);
 
 //SetPath given the path array and commandLine
 void setPath(struct Path** Paths, char* commandLine);
@@ -29,10 +27,13 @@ void destructNode(struct Path* node);
 //Returns NULL if file not found
 char* findCmd(struct Path** PathArray, char* file);
 
-//Helper functions
+//Prints the paths given the array of paths.
+void printPath(struct Path** target);
 
 //Prings the target node. 0 for success, 1 for FAIL
 int printPathNode(struct Path* target);
+
+char* getNodeVal(struct Path* target);
 
 //Creates a empty Path node.
 //Returns pointer to Path node
