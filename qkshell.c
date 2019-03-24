@@ -80,7 +80,7 @@ int main (){
     //Now we check for piped commands.
     int p[2]; //This is our pipe.
     pid_t pid; //Process ID
-    int infd = 0; //The input filedescriptor
+    int fd_in = 0; //The input filedescriptor
 
     int i;
     //While we have commands,
@@ -90,13 +90,13 @@ int main (){
       pipe(p); //Create the pipe for communication.
       //The child process.
       if ( (pid = fork()) == 0){
-        dup2(infd,0); //stdin becomes infd.
+        dup2(fd_in,0); //stdin becomes fd_in.
         if (commandNode -> command[i+1] != NULL){ //If we have more commands.
           dup2(p[1],1); //set the write end of pipe to stdout of process.
         }
         close(p[0]); //Close the read end.
 
-        //Change the 0 and 1 away from the pipes and infd if we have redirection
+        //Change the 0 and 1 away from the pipes and fd_in if we have redirection
         if (commandNode -> command[i] -> infilename != NULL){
           int infd = open(commandNode -> command[i] -> infilename, O_RDONLY);
           if (infd == -1 ){
@@ -106,18 +106,18 @@ int main (){
           }
         }
         if (commandNode -> command[i] -> outfilename != NULL){
-          int infd = open(commandNode -> command[i] -> outfilename, O_WRONLY | O_CREAT, 0666);
-          if (infd == -1 ){
+          int infd = open(commandNode -> command[i] -> outfilename,O_WRONLY | O_CREAT | O_TRUNC, 0666); //Open and truncate original content
+          if (infd == -1 ){ //If there was an error.
             fprintf(stderr, "Output file %s could not be opened", commandNode -> command[i] -> outfilename);
           } else {
-            dup2(infd, 1); //Set stdin to the opened fd.
+            dup2(infd, commandNode -> command[i] -> fdOut); //Set the stream we want to the output file's fd.
           }
         }
         execvp(commandNode -> command[i] -> argv[0], commandNode -> command[i] -> argv);
       } else{ //The parent process.
         wait(NULL); //Parent will wait for child to finish executing.
         close(p[1]); //Close the write end of pipe.
-        infd = p[0]; //infd will be set to the read end of pipe. Next process will use this to set stdin.
+        fd_in = p[0]; //fd_in will be set to the read end of pipe. Next process will use this to set stdin.
       }
 
     }

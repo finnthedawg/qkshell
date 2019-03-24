@@ -10,4 +10,5 @@ int main(){
   fgets(text, MAXLINE, stdin);
   text = strsep(&text , "\n");
   printf("%spiped! ", text);
+  fprintf(stderr, "Some error happened here\n");
 }

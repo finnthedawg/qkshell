@@ -64,10 +64,17 @@ char* addList(char* commandLine, struct Hline* front){
       latest->infilename = strdup(command);
       command = strtok(NULL," ");
     }
-    if (command != NULL && strcmp(command, ">") == 0){
+    if (command != NULL && (strcmp(command, ">") == 0 || strcmp(command, "1>") == 0)){
       command = strtok(NULL," ");
       latest->outfilename = strdup(command);
       command = strtok(NULL," ");
+      latest -> fdOut = 1; //stdout.
+    }
+    if (command != NULL && strcmp(command, "2>") == 0){
+      command = strtok(NULL," ");
+      latest->outfilename = strdup(command);
+      command = strtok(NULL," ");
+      latest -> fdOut = 2; //stderr.
     }
   }
   free(commandLineDup);
