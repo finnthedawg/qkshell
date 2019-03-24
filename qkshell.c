@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h> //For wait() on the parent for child
 
 #include "history.h"
 #include "path.h"
@@ -13,11 +15,8 @@ int emptyString(char * string);
 int invokeHistory(char* commandLine);
 
 int main (){
-  //Lets start the command Line struct;
-  struct Hcommand* frontCommandLine = newHcommand();
-
-  //Load history from file.
-  struct Hline* front = loadHistory();
+  //This is the linked list of piped commands
+  struct Hcommand* frontCommandLine = loadHistory();
 
   //Store paths and init first to nlll.
   struct Path* PathArray[PATHCOUNT] = {NULL};
@@ -35,10 +34,10 @@ int main (){
   strcat(historyDirectory, "/history.txt");
 
   int replayHistory = 0;
-  //Each time user enters a new command.
+  //This is the full line (piped)
   char* commandLine;
-  char* command;
-  struct Hline* commandNode;
+  char* command; //This is the actual command of each command.
+  struct Hcommand* commandNode; //This is the piped command in Hcommand format.
   while(1){
     printf(">> ");
     if (replayHistory == 0){
@@ -55,31 +54,59 @@ int main (){
     //If we are invoking past history, go through loop but set vars from history.
     if(invokeHistory(commandLine)){
       replayHistory = 1;
-      int commandNumber = invokeHistory(commandLine);
-      commandNode = findHistoryNode(front, commandNumber);
+      int commandNumber = invokeHistory(commandLine); //Gets the command number from our entered command.
+      commandNode = findHistoryNode2(frontCommandLine, commandNumber);
       if(commandNode == NULL){
         printf("No command found for history number: %d\n", invokeHistory(commandLine));
         replayHistory = 0;
         continue;
       }
-      command = commandNode->argv[0];
-      commandLine = cmdLine(commandNode);
+      command = strdup(commandNode -> command[0] -> argv[0]);
+      //We take the first command of the pipe as "command Line" for now.
+      commandLine = cmdLine(commandNode -> command[0]);
     }
 
     if(replayHistory == 0){
       //Write the line to the history file.
       appendCommand(historyDirectory, commandLine);
-
       // Parse it into history linked list.
       addLineHcommand(commandLine, frontCommandLine);
-      printCommandHistory(frontCommandLine);
-      command = addList(commandLine, front);
-      commandNode = backList(front);
+      //Retrieve the command.
+      commandNode = CommandBackList(frontCommandLine);
+      command = strdup(commandNode -> command[0] -> argv[0]);
+    }
+
+    //Now we check for piped commands.
+    int p[2]; //This is our pipe.
+    pid_t pid; //Process ID
+    int fd_in = 0; //The input filedescriptor
+
+    int i;
+    //While we have commands,
+    for (i = 0; commandNode -> command[i] != NULL; i++){
+      //If our command has
+
+      pipe(p); //Create the pipe for communication.
+      //The child process.
+      if ( (pid = fork()) == 0){
+        dup2(fd_in,0); //stdin becomes fd_in.
+        if (commandNode -> command[i+1] != NULL){ //If we have more commands.
+          dup2(p[1],1); //set the write end of pipe to stdout of process.
+        }
+        close(p[0]); //Close the read end.
+        //We also implement input redirection.
+        execvp(commandNode -> command[i] -> argv[0], commandNode -> command[i] -> argv);
+      } else{ //The parent process.
+        wait(NULL); //Parent will wait for child to finish executing.
+        close(p[1]); //Close the write end of pipe.
+        fd_in = p[0]; //fd_in will be set to the read end of pipe. Next process will use this to set stdin.
+      }
+
     }
 
     //Begin checking built in commands.
     if(!strcmp(command, "history")){
-      printHistory(front);
+      printCommandHistory(frontCommandLine);
     }
 
     else if(!strcmp(command, "export")){
@@ -98,13 +125,13 @@ int main (){
     }
 
     else if(!strcmp(command, "cd")){
-      if(chdir(commandNode->argv[1]) == -1){
-        printf("qksh: %s: error changing directory\n", front->argv[1]);
+      if(chdir(commandNode->command[0]->argv[1]) == -1){
+        printf("qksh: %s: error changing directory\n", frontCommandLine->command[0]->argv[1]);
       }
     }
     else if(!strcmp(command, "exit")){
-      destructList(front);
-      destructPaths(PathArray);
+      destructList(frontCommandLine);
+      //destructPaths(PathArray);
       free(commandLine);
       break;
     }
@@ -118,10 +145,10 @@ int main (){
         printf("command arguments:\n");
         int i;
         for(i = 1; i< PATHCOUNT; i++){
-          if(commandNode->argv[i] == NULL){
+          if(commandNode->command[0]->argv[i] == NULL){
             break;
           }
-          printf("%s\n", commandNode->argv[i]);
+          printf("%s\n", commandNode->command[0]->argv[i]);
         }
       }
       free(foundDirectory);
@@ -132,6 +159,7 @@ int main (){
   }
   free(historyDirectory);
 }
+
 
 int emptyString(char * string){
   int i;

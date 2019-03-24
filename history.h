@@ -2,14 +2,14 @@
 #define ARGCOUNT 32
 #define MAXLINE 1024
 
-//Struct defining each command in History.
+//Struct defining each command cmd -a -test < ok.txt > out.txt
 struct Hline {
   int argc;
-  //Each command can have 32 args
+  //Each command can have 32 args (First is the actual command)
   char* argv[ARGCOUNT];
-  //Store name of input file to stdin.
+  //Store name of input file (If it exists)
   char* infilename;
-  //Store name of output file.
+  //Store name of output file. (If it exists)
   char* outfilename;
   //Store stdout or stderr for the output;
   int fdOut;
@@ -17,7 +17,7 @@ struct Hline {
   struct Hline* next;
 };
 
-//Struct definining each line in history.
+//Struct definining each line in history. (Piped command)
 struct Hcommand {
   int argc; //Assume ARGCOUNT number of piped commands.
   struct Hline* command[ARGCOUNT];
@@ -33,17 +33,13 @@ void addLineHcommand(char * commandLine, struct Hcommand* front);
 //Inserts /0 into commandLine string's delimiters.
 char* addList(char* commandLine,struct Hline* front);
 
-//Goes through and destructs list.
-void destructList(struct Hline* front);
-
-//Prints the history
-void printHistory(struct Hline* front);
-
 //Print the history including piped commands.
 void printCommandHistory(struct Hcommand * frontCommandLine);
 
 //returns the Nth node;
 struct Hline* findHistoryNode(struct Hline* front, int n);
+
+struct Hcommand* findHistoryNode2(struct Hcommand* front, int n);
 
 //returns the original command;
 char* cmdLine(struct Hline* cmd);
@@ -52,8 +48,11 @@ char* cmdLine(struct Hline* cmd);
 //Adds a "\n after command";
 void appendCommand(char* historyDirectory, char* commandLine);
 
+// //Loads the history to linked list and return pointer to front of list.
+// struct Hline* loadHistory();
+
 //Loads the history to linked list and return pointer to front of list.
-struct Hline* loadHistory();
+struct Hcommand* loadHistory();
 
 //Helper functions
 //Creates structure of a new command.
@@ -62,7 +61,13 @@ struct Hline* newHline();
 //Creates structues of a new piped command line
 struct Hcommand* newHcommand();
 
-//Delete structure.
+//Goes through and destructs the linked list of piped commands.
+void destructList(struct Hcommand* front);
+
+//Deletes the piped command
+void destructHcommand(struct Hcommand* node);
+
+//Delete a line
 void destructHline(struct Hline* node);
 
 //Returns the last commandLine in command List.

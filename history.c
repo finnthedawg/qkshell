@@ -18,8 +18,9 @@ void addLineHcommand(char * commandLine, struct Hcommand* front){
   }
 
   //Break up the the line into individual commands based on |
+  //We assume we don't have two pipes || together.
   char* command = strsep(&commandLineDup, "|");
-  //Because addList also utilizes strtok.
+
   while(command != NULL){
     //We are storing the command
     struct Hline* newCommandHline =  newHline();
@@ -94,24 +95,24 @@ void printCommandHistory(struct Hcommand * frontCommandLine){
 }
 
 
-//Prints the history given the front of the command..
-void printHistory(struct Hline* front){
-  if(front == NULL){
-    printf("There is no history yet.\n");
-  } else {
-    int count = 1;
-    printf(" %d ", count);
-    printHline(front);
-    printf("\n");
-    while(front -> next != NULL && count++){
-      front = front -> next;
-      printf(" %d ", count);
-      printHline(front);
-      printf("\n");
-    }
-    return;
-  }
-}
+// //Prints the history given the front of the command..
+// void printHistory(struct Hline* front){
+//   if(front == NULL){
+//     printf("There is no history yet.\n");
+//   } else {
+//     int count = 1;
+//     printf(" %d ", count);
+//     printHline(front);
+//     printf("\n");
+//     while(front -> next != NULL && count++){
+//       front = front -> next;
+//       printf(" %d ", count);
+//       printHline(front);
+//       printf("\n");
+//     }
+//     return;
+//   }
+// }
 
 //Appends entered command to file.
 //Adds a "\n after command";
@@ -122,22 +123,37 @@ void appendCommand(char* historyDirectory, char* commandLine){
 
 }
 
-struct Hline* loadHistory(){
-  struct Hline* front = newHline();
-
+struct Hcommand* loadHistory(){
+  struct Hcommand* front = newHcommand();
   FILE *fp = fopen("history.txt","r");
   if(fp != NULL){
     char* commandLine = (char*)malloc(1024);
     while(fgets(commandLine, 1024, fp)){
       strtok(commandLine, "\n");
-      addList(commandLine, front);
+      addLineHcommand(commandLine, front);
     }
     free(commandLine);
     fclose(fp);
   }
-
   return(front);
 }
+
+// //Loads the history normally.
+// struct Hline* loadHistory(){
+//   struct Hline* front = newHline();
+//
+//   FILE *fp = fopen("history.txt","r");
+//   if(fp != NULL){
+//     char* commandLine = (char*)malloc(1024);
+//     while(fgets(commandLine, 1024, fp)){
+//       strtok(commandLine, "\n");
+//       addList(commandLine, front);
+//     }
+//     free(commandLine);
+//     fclose(fp);
+//   }
+//   return(front);
+// }
 
 //#Helper functions
 void printHline(struct Hline* node){
@@ -187,17 +203,27 @@ void destructHline(struct Hline* node){
   for (i = 0; i<ARGCOUNT; i++){
     free(node -> argv[i]);
   }
+  free(node -> infilename);
+  free(node -> outfilename);
   free(node);
 }
 
-void destructList(struct Hline* front){
-  struct Hline* seek;
+void destructHcommand(struct Hcommand* node){
+  int i;
+  for (i = 0; (node -> command[i]) != NULL; i++){
+    destructHline(node -> command[i]);
+  }
+  free(node);
+}
+
+void destructList(struct Hcommand* front){
+  struct Hcommand* seek;
   while(front->next != NULL ){
     seek = front->next;
-    destructHline(front);
+    destructHcommand(front);
     front = seek;
   }
-  destructHline(front);
+  destructHcommand(front);
 }
 
 //Returns the last commandLine in command List.
@@ -216,6 +242,21 @@ struct Hline* backList(struct Hline* front){
   return front;
 }
 
+//Gets the history node including piped commands.
+struct Hcommand* findHistoryNode2(struct Hcommand* front, int n){
+  int i;
+  for(i = 1;front -> next != NULL; i++){
+    if(i == n){
+      return(front);
+    }
+    front = front -> next;
+  }
+  if(i == n){
+    return (front);
+  }
+  return(NULL);
+}
+
 struct Hline* findHistoryNode(struct Hline* front, int n){
   int i;
   for(i = 1;front -> next != NULL; i++){
@@ -231,6 +272,7 @@ struct Hline* findHistoryNode(struct Hline* front, int n){
 }
 
 char* cmdLine(struct Hline* cmd){
+
   char * commandLine = (char *)calloc(MAXLINE, sizeof(char));
   char * space = (char *)malloc(2);
   *space = ' ';
