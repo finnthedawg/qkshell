@@ -50,7 +50,6 @@ char* addList(char* commandLine, struct Hline* front){
     back->next = latest;
   }
 
-  //Populate the struct with recieved values.
   char* command = strtok(commandLineDup, " ");
   //Store value of first command.
   char* first = strdup(command);
@@ -58,6 +57,18 @@ char* addList(char* commandLine, struct Hline* front){
     latest->argv[latest->argc] = strdup(command);
     latest->argc ++;
     command = strtok(NULL," ");
+    //Check for redirected input or outputs.
+    //If found, we set the infile name and skip adding it to the argvs
+    if(command != NULL && strcmp(command, "<") == 0){
+      command = strtok(NULL," ");
+      latest->infilename = strdup(command);
+      command = strtok(NULL," ");
+    }
+    if (command != NULL && strcmp(command, ">") == 0){
+      command = strtok(NULL," ");
+      latest->outfilename = strdup(command);
+      command = strtok(NULL," ");
+    }
   }
   free(commandLineDup);
   return(first);

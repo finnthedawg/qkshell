@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <unistd.h>
+#include <fcntl.h> // for open()
+#include <unistd.h>  //For close()
 #include <sys/types.h>
 #include <sys/wait.h> //For wait() on the parent for child
 
@@ -69,7 +70,7 @@ int main (){
     if(replayHistory == 0){
       //Write the line to the history file.
       appendCommand(historyDirectory, commandLine);
-      // Parse it into history linked list.
+      // Parse it into linked list.
       addLineHcommand(commandLine, frontCommandLine);
       //Retrieve the command.
       commandNode = CommandBackList(frontCommandLine);
@@ -79,7 +80,7 @@ int main (){
     //Now we check for piped commands.
     int p[2]; //This is our pipe.
     pid_t pid; //Process ID
-    int fd_in = 0; //The input filedescriptor
+    int infd = 0; //The input filedescriptor
 
     int i;
     //While we have commands,
@@ -89,17 +90,34 @@ int main (){
       pipe(p); //Create the pipe for communication.
       //The child process.
       if ( (pid = fork()) == 0){
-        dup2(fd_in,0); //stdin becomes fd_in.
+        dup2(infd,0); //stdin becomes infd.
         if (commandNode -> command[i+1] != NULL){ //If we have more commands.
           dup2(p[1],1); //set the write end of pipe to stdout of process.
         }
         close(p[0]); //Close the read end.
-        //We also implement input redirection.
+
+        //Change the 0 and 1 away from the pipes and infd if we have redirection
+        if (commandNode -> command[i] -> infilename != NULL){
+          int infd = open(commandNode -> command[i] -> infilename, O_RDONLY);
+          if (infd == -1 ){
+            fprintf(stderr, "Input file %s could not be opened", commandNode -> command[i] -> infilename);
+          } else {
+            dup2(infd, 0); //Set stdin to the opened fd.
+          }
+        }
+        if (commandNode -> command[i] -> outfilename != NULL){
+          int infd = open(commandNode -> command[i] -> outfilename, O_WRONLY | O_CREAT, 0666);
+          if (infd == -1 ){
+            fprintf(stderr, "Output file %s could not be opened", commandNode -> command[i] -> outfilename);
+          } else {
+            dup2(infd, 1); //Set stdin to the opened fd.
+          }
+        }
         execvp(commandNode -> command[i] -> argv[0], commandNode -> command[i] -> argv);
       } else{ //The parent process.
         wait(NULL); //Parent will wait for child to finish executing.
         close(p[1]); //Close the write end of pipe.
-        fd_in = p[0]; //fd_in will be set to the read end of pipe. Next process will use this to set stdin.
+        infd = p[0]; //infd will be set to the read end of pipe. Next process will use this to set stdin.
       }
 
     }
