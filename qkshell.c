@@ -96,7 +96,8 @@ int main (){
       command = strdup(commandNode -> command[0] -> argv[0]);
     }
 
-    if(!strcmp(command, "exit")){
+    //Free memory and exit
+    if(!strcmp(command, "exit") || !strcmp(command, "quit")){
       destructList(frontCommandLine);
       free(historyDirectory);
       free(commandLine);
