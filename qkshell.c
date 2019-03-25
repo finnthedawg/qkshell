@@ -22,7 +22,6 @@ int invokeHistory(char* commandLine);
 char* expandVariable(char *string, struct Path** PathArray);
 
 int main (){
-  int i, j;
 
   //This is the linked list of piped commands
   struct Hcommand* frontCommandLine = loadHistory();
@@ -104,17 +103,11 @@ int main (){
       return(0);
     }
 
-    //Update the PathArray
-    for(i = 0; PathArray[i] != NULL; i++){
-      //Add the string to our array.
-      stringPathArray[i] = getNodeKeyVal(PathArray[i]);
-    }
-
     //Now we check the piped commands.
     int p[2]; //This is our pipe.
     pid_t pid; //Process ID
     int fd_in = 0; //The input filedescriptor
-
+    int i, j;
     //While our commandNode contains commands
     for (i = 0; commandNode -> command[i] != NULL; i++){
 
@@ -136,6 +129,13 @@ int main (){
             printPath(PathArray);
           } else {
             setPath(PathArray, commandLine);
+            //Update the stringPathArray
+            int v;
+            for(v = 0; PathArray[v] != NULL; v++){
+              char * NodeKeyVal = (char*)malloc(MAXLINE);
+              strcpy(NodeKeyVal, getNodeKeyVal(PathArray[v]));
+              stringPathArray[v] = NodeKeyVal;
+            }
           }
           continue;
         }
@@ -192,6 +192,13 @@ int main (){
             printPath(PathArray);
           } else {
             setPath(PathArray, commandLine);
+            //Update the stringPathArray
+            int v;
+            for(v = 0; PathArray[v] != NULL; v++){
+              char * NodeKeyVal = (char*)malloc(MAXLINE);
+              strcpy(NodeKeyVal, getNodeKeyVal(PathArray[v]));
+              stringPathArray[v] = NodeKeyVal;
+            }
           }
           return(0);
         }
