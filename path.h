@@ -33,6 +33,10 @@ void printPath(struct Path** target);
 //Prings the target node. 0 for success, 1 for FAIL
 int printPathNode(struct Path* target);
 
+//Gets the key and valye of a target path node.
+char* getNodeKeyVal(struct Path* target);
+
+//Gets the value of a target path node.
 char* getNodeVal(struct Path* target);
 
 //Creates a empty Path node.

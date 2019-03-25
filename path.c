@@ -82,7 +82,6 @@ void destructNode(struct Path* node){
 void setNode(struct Path* target, char* Paths){
   //Clear the target path node
   //Because shell should overwrite when you set variables.
-  printf("Testing target %s", target -> argv[0]);
   int i = 1;
   while (target -> argv[i] != NULL){
     free(target -> argv[i]);
@@ -138,16 +137,28 @@ int printPathNode(struct Path* target){
   return(0);
 }
 
+char* getNodeKeyVal(struct Path* target){
+  char* NodeKeyVal = (char*)malloc(MAXLINE);
+  if(target == NULL){
+    return(NULL);
+  } else {
+    strcat(NodeKeyVal, target -> argv[0]);
+    strcat(NodeKeyVal, "=");
+    strcat(NodeKeyVal, getNodeVal(target));
+    return(NodeKeyVal);
+  }
+}
+
 char* getNodeVal(struct Path* target){
-  char* pathVal = (char*)malloc(MAXLINE);
+  char* NodeVal = (char*)malloc(MAXLINE);
   if(target == NULL){
     return(NULL);
   } else {
     int i;
     for (i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
-      (target -> argv[i+1] != NULL ? strcat(pathVal,target -> argv[i]) || strcat(pathVal,":") : strcat(pathVal,target -> argv[i]) || NULL);
+      (target -> argv[i+1] != NULL ? strcat(NodeVal,target -> argv[i]) == strcat(NodeVal,":") : strcat(NodeVal,target -> argv[i]) || NULL);
     }
-    return(pathVal);
+    return(NodeVal);
   }
 }
 

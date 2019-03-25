@@ -22,6 +22,8 @@ int invokeHistory(char* commandLine);
 char* expandVariable(char *string, struct Path** PathArray);
 
 int main (){
+  int i, j;
+  
   //This is the linked list of piped commands
   struct Hcommand* frontCommandLine = loadHistory();
 
@@ -100,12 +102,18 @@ int main (){
       return(0);
     }
 
+    //Create our PATH array made of string pointers so we can pass environment to execve or execvpe.
+    char* stringPathArray[PATHCOUNT] = {NULL};
+    for(i = 0; PathArray[i] != NULL; i++){
+      //Add the string to our array.
+      stringPathArray[i] = getNodeKeyVal(PathArray[i]);
+    }
+
     //Now we check the piped commands.
     int p[2]; //This is our pipe.
     pid_t pid; //Process ID
     int fd_in = 0; //The input filedescriptor
 
-    int i, j;
     //While our commandNode contains commands
     for (i = 0; commandNode -> command[i] != NULL; i++){
 
@@ -171,6 +179,7 @@ int main (){
             dup2(infd, commandNode -> command[i] -> fdOut); //Set the stream we want to the output file's fd.
           }
         }
+
         //Here we should check for built in commands.
         if(!strcmp(commandNode -> command[i] -> argv[0], "history")){
           printCommandHistory(frontCommandLine);
@@ -203,7 +212,7 @@ int main (){
             printf("qksh: command %s not found\n", commandNode -> command[i] -> argv[0]);
             return(0);
           } else {
-            execvp(foundDirectory, commandNode -> command[i] -> argv);
+            execve(foundDirectory, commandNode -> command[i] -> argv, stringPathArray);
           }
         }
       } else{ //The "joining" process.

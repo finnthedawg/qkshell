@@ -156,23 +156,6 @@ struct Hcommand* loadHistory(){
   return(front);
 }
 
-// //Loads the history normally.
-// struct Hline* loadHistory(){
-//   struct Hline* front = newHline();
-//
-//   FILE *fp = fopen("history.txt","r");
-//   if(fp != NULL){
-//     char* commandLine = (char*)malloc(1024);
-//     while(fgets(commandLine, 1024, fp)){
-//       strtok(commandLine, "\n");
-//       addList(commandLine, front);
-//     }
-//     free(commandLine);
-//     fclose(fp);
-//   }
-//   return(front);
-// }
-
 //#Helper functions
 void printHline(struct Hline* node){
   if(node == NULL){
