@@ -156,7 +156,7 @@ struct Hcommand* loadHistory(){
   return(front);
 }
 
-//#Helper functions
+//Prints the history line.
 void printHline(struct Hline* node){
   if(node == NULL){
     printf("NULL node\n");
@@ -164,6 +164,17 @@ void printHline(struct Hline* node){
     int i;
     for (i = 0; i<ARGCOUNT && node -> argv[i] != NULL; i++){
       printf("%s ", node -> argv[i]);
+    }
+    //Also prints back pipes we have used < > or >
+    if (node -> infilename != NULL){
+      printf(" < %s", node -> infilename);
+    }
+    if (node -> outfilename != NULL) {
+      if(node -> fdOut == 2){
+        printf(" 2> %s", node -> outfilename);
+      } else {
+        printf(" > %s", node -> outfilename);
+      }
     }
   }
 }

@@ -113,7 +113,7 @@ int main (){
 
       //Scan through the arguments and expand the variables.
       for (j = 0; commandNode -> command[i] -> argv[j] != NULL; j++){
-        char* newVariable = expandVariable(commandNode -> command[i] -> argv[j],PathArray);
+        char* newVariable = expandVariable(commandNode -> command[i] -> argv[j], PathArray);
         if(newVariable != NULL){
           free(commandNode -> command[i] -> argv[j]);
           commandNode -> command[i] -> argv[j] = newVariable;
@@ -238,7 +238,6 @@ int main (){
 
 //Expands the string based on our PATH and PWD variables.
 char* expandVariable(char *target, struct Path** PathArray){
-
   //Check for PathArrays
   int posA; //Position of before the variable
   int posB;  //Position of after the variable.
@@ -248,7 +247,8 @@ char* expandVariable(char *target, struct Path** PathArray){
     //Set the expansion key to something like $PATH
     strcat(expansionKey, "$");
     strcat(expansionKey, PathArray[i]->argv[0]);
-    char* nodeVal = getNodeVal(PathArray[i]);
+    char* nodeVal = (char*)malloc(1024);
+    strcpy(nodeVal, getNodeVal(PathArray[i]));
     char* front = strstr(target, expansionKey);
     //If we have found something, front wont be NULL.
     if (front != NULL){
