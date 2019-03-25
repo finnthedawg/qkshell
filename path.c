@@ -156,7 +156,13 @@ char* getNodeVal(struct Path* target){
   } else {
     int i;
     for (i = 1; i<PATHCOUNT && target -> argv[i] != NULL; i++){
-      (target -> argv[i+1] != NULL ? strcat(NodeVal,target -> argv[i]) == strcat(NodeVal,":") : strcat(NodeVal,target -> argv[i]) || NULL);
+      //Check if we need to insert : if there are more paths
+      if(target -> argv[i+1] != NULL){
+        strcat(NodeVal,target -> argv[i]);
+        strcat(NodeVal,":");
+      } else {
+        strcat(NodeVal,target -> argv[i]);
+      }
     }
     return(NodeVal);
   }

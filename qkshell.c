@@ -23,7 +23,7 @@ char* expandVariable(char *string, struct Path** PathArray);
 
 int main (){
   int i, j;
-  
+
   //This is the linked list of piped commands
   struct Hcommand* frontCommandLine = loadHistory();
 
@@ -44,6 +44,8 @@ int main (){
   second -> argv[1] = PWDvariable;
   second -> pathC = 2;
   PathArray[1] = second;
+  //Create our PATH array made of string pointers so we can pass environment to execve or execvpe.
+  char* stringPathArray[PATHCOUNT] = {NULL};
 
   //Remember where the history.txt is located.
   char* historyDirectory = (char*)malloc(MAXLINE);
@@ -102,8 +104,7 @@ int main (){
       return(0);
     }
 
-    //Create our PATH array made of string pointers so we can pass environment to execve or execvpe.
-    char* stringPathArray[PATHCOUNT] = {NULL};
+    //Update the PathArray
     for(i = 0; PathArray[i] != NULL; i++){
       //Add the string to our array.
       stringPathArray[i] = getNodeKeyVal(PathArray[i]);
