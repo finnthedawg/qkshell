@@ -118,6 +118,7 @@ int main (){
         if(newVariable != NULL){
           free(commandNode -> command[i] -> argv[j]);
           commandNode -> command[i] -> argv[j] = newVariable;
+          commandLine = cmdLine(commandNode -> command[i]);
         }
       }
 
